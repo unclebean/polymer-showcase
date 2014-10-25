@@ -1,0 +1,25 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<polymer-element name="story-task">
+    <template>
+        <style>
+            :host{
+                background-color:red;
+            }
+            .task ::content h2{
+                color: yellow;
+            }
+        </style>
+        <div class="task">
+            <content select="h2"></content>
+            <content select="h3"></content>
+
+        </div>
+    </template>
+    <script>
+        Polymer("story-task", {
+            createdCallback:function(){
+                console.log("task element would be created.");
+            }
+        });
+    </script>
+</polymer-element>

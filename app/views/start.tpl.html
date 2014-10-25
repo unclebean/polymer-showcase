@@ -1,0 +1,9 @@
+<core-header-panel class="start">
+    <core-toolbar class="dark-theme">
+        <span flex>Story Board</span>
+    </core-toolbar>
+    <section class="start-story">
+        <paper-input id="teamName" class="team" invalid="{{isInvalid}}" value="{{teamName}}" floatinglabel="" label="Start with your team!" validate="^[0-9|a-z|A-Z|-]*$" error="The team name is invalid!"></paper-input>
+        <paper-button raisedbutton="" class="start-btn" label="start" role="button" tabindex="0" aria-label="colored" ng-click="start()"></paper-button>
+    </section>
+</core-header-panel>
