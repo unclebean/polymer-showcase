@@ -17,6 +17,7 @@
         <!-- endbuild -->
         <script src="../bower_components/platform/platform.js"></script>
         <link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
+        <link rel="import" href="../bower_components/core-icon-button/core-icon-button.html">
         <link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
         <link rel="import" href="../bower_components/paper-input/paper-input.html">
         <link rel="import" href="../bower_components/paper-button/paper-button.html">
@@ -26,6 +27,8 @@
         <link rel="import" href="../bower_components/core-icons/core-icons.html">
         <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
         <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+        <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+        <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
         <link rel="import" href="components/task.html">
 
     </head>
@@ -37,12 +40,18 @@
         <div ng-view>
 
         </div>
-
-
+        <div id="loadingWrapper" ng-show="isLoading" style="position:absolute;top:0px;bottom:0px;z-index:11;width:100%;background:transparent;">
+            <span us-spinner="{radius:30, width:8, length: 16}" spinner-key="spinner"></span>
+        </div>
+        <paper-toast id="commonToast" role="alert" text="{{toastMessage}}"></paper-toast>
         <!-- build:js scripts/vendor.js -->
         <!-- bower:js -->
         <script src="../bower_components/angular/angular.min.js"></script>
         <script src="../bower_components/angular-route/angular-route.min.js"></script>
+        <script src="../bower_components/ng-polymer-elements/ng-polymer-elements.js"></script>
+        <script src="../bower_components/spin.js/spin.js"></script>
+        <script src="../bower_components/angular-spinner/angular-spinner.min.js"></script>
+
         <!-- endbower -->
         <!-- endbuild -->
 

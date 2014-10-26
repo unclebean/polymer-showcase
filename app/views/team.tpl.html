@@ -1,10 +1,12 @@
-<core-scaffold>
+<core-scaffold id="storyBoard">
 
     <core-header-panel navigation="" flex="" mode="middle">
-        <core-toolbar class="dark-theme">Teams</core-toolbar>
+        <core-toolbar class="dark-theme">
+            <span>{{navTitle}}</span>
+            <core-icon-button id="create-project" icon="{{manageProjectIcon}}" ng-click="toggleDialog()"></core-icon-button>
+        </core-toolbar>
         <core-menu theme="core-light-theme">
-            <core-item icon="settings" label="item1" horizontal="" center="" layout=""></core-item>
-            <core-item icon="settings" label="item2" horizontal="" center="" layout=""></core-item>
+            <core-item icon="settings" ng-repeat="(p, _) in projects" label="{{p}}" horizontal="" center="" layout=""></core-item>
         </core-menu>
     </core-header-panel>
 
@@ -28,3 +30,10 @@
         </story-task>
     </div>
 </core-scaffold>
+
+<paper-dialog id="new-project" heading="New project" transition="paper-dialog-transition-center">
+
+    <paper-input label="Input new project name" ng-model="newProjectName"></paper-input>
+
+    <paper-button raisedbutton="" label="Ok" ng-click="createProject()"></paper-button>
+</paper-dialog>

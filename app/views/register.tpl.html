@@ -1,0 +1,15 @@
+<core-header-panel class="start">
+    <core-toolbar class="dark-theme">
+        <paper-icon-button id="navicon" icon="arrow-back"></paper-icon-button>
+        <h3>Register</h3>
+    </core-toolbar>
+    <section class="reg-section">
+        <div class="reg-form">
+            <paper-input ng-model="email" label="Email" floatinglabel=""></paper-input>
+            <paper-input ng-model="username" label="Username" floatinglabel=""></paper-input>
+            <paper-input ng-model="password" label="Password" floatinglabel=""></paper-input>
+            <paper-input ng-model="confirmpwd" label="Confirm password" floatinglabel=""></paper-input>
+            <paper-button label="Sign up" ng-click="reg()"></paper-button>
+        </div>
+    </section>
+</core-header-panel>
