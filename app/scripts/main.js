@@ -77,11 +77,11 @@ app.controller('StartStoryController', [
             login($scope.username, $scope.password).then(function(result){
                 $scope.isInvalidUser = false;
                 $scope.isInvalidPassword = false;
-                setTimeout(function(){
-                    $rootScope.stopLoading();
 
-                }, 100);
+                $rootScope.stopLoading();
                 $location.path('/storyboard/'+$scope.username);
+
+
             }, function(err){
                 $rootScope.stopLoading();
                 $rootScope.showToastWithMsg(err);
