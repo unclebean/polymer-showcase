@@ -2,8 +2,9 @@
 
     <core-header-panel navigation="" flex="" mode="middle">
         <core-toolbar class="dark-theme">
+            <img ng-src="{{userPhoto}}" width="24px" height="24px">
             <span>{{navTitle}}</span>
-            <core-icon-button id="create-project" icon="{{manageProjectIcon}}" ng-click="toggleDialog()"></core-icon-button>
+            <core-icon-button id="create-project" icon="settings" ng-click="toggleDialog()"></core-icon-button>
         </core-toolbar>
         <core-menu theme="core-light-theme">
             <core-item icon="settings" ng-repeat="(p, _) in projects" label="{{p}}" horizontal="" center="" layout=""></core-item>
@@ -14,20 +15,17 @@
         Title
     </div>
     <div tool="addTask">
-        <core-icon-button icon="add"></core-icon-button>
+        <core-icon-button icon="add" ng-click="createTask()"></core-icon-button>
     </div>
     <div>
-        <paper-tabs selected="0" noink="" role="tablist">
+        <paper-tabs id="board" selected="0" noink="" role="tablist">
             <paper-tab role="tab" class="core-selected" active="">TODO</paper-tab>
             <paper-tab role="tab" class="">Doing</paper-tab>
             <paper-tab role="tab">Done</paper-tab>
         </paper-tabs>
     </div>
-    <div>
-        <story-task>
-            <h2>test task</h2>
-            <h3>hugh</h3>
-        </story-task>
+    <div class="task-container">
+
     </div>
 </core-scaffold>
 
@@ -36,4 +34,27 @@
     <paper-input label="Input new project name" ng-model="newProjectName"></paper-input>
 
     <paper-button raisedbutton="" label="Ok" ng-click="createProject()"></paper-button>
+</paper-dialog>
+
+
+
+<paper-dialog id="new-task" heading="New Task" transition="paper-dialog-transition-bottom">
+
+    <paper-input label="Task name" ng-model="tempNewTask.name"></paper-input>
+    <paper-input label="Task description" ng-model="tempNewTask.desc"></paper-input>
+    <div>
+        <span style="font-size:0.8em">Task Type: </span>
+        <core-dropdown id="taskType" class="task-dropdown" valign="top" valueattr="label">
+            <core-item ng-repeat="(type, img) in taskTypes"  label="{{type}}" ng-src="{{img}}"></core-item>
+        </core-dropdown>
+    </div>
+    <div>
+        <span style="font-size:0.8em">Owner: </span>
+        <core-dropdown id="taskOwner" class="task-dropdown" valign="top" valueattr="label">
+            <core-item ng-repeat="user in users"  label="{{user.username}}" ng-src="{{user.photoUrl}}"></core-item>
+        </core-dropdown>
+    </div>
+    <paper-input label="Estimate: " ng-model="tempNewTask.estimate" type="number"></paper-input>
+
+    <paper-button raisedbutton="" label="Ok" ng-click="addNewTask()"></paper-button>
 </paper-dialog>

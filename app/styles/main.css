@@ -31,7 +31,7 @@ core-scaffold {
 
 .start-story {
     margin: 20px;
-    padding: 80px 20px;
+    padding: 60px 20px;
 }
 
 .reg-section {
@@ -81,3 +81,37 @@ paper-dialog {
     }
 }
 
+.task-container{
+    /* basic styling */
+    width: 100%;
+    /* flexbox setup */
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.task img{
+    float:left;
+}
+.task h2{
+    float:left;
+    font-size: 0.6em;
+}
+
+.task-type{
+    height: 100%;
+    left: 0;
+    position: absolute;
+    text-indent: -9999em;
+    top: 0;
+    width: 5px;
+    background-color: red;
+}
+
+.task-dropdown core-item::shadow core-icon, .task-dropdown::shadow core-item::shadow core-icon{
+    width:16px;
+    height:16px;
+}

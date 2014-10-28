@@ -5,6 +5,7 @@ app.run([
         $rootScope.history = [];
         $rootScope.toastMessage = null;
         $rootScope.isLoading = false;
+        $rootScope.currentUser = null;
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             $rootScope.history.push($location.path());
             /*console.log('Current route name: ' + $location.path());
@@ -74,10 +75,10 @@ app.controller('StartStoryController', [
                 return false;
             }
             $rootScope.loading();
-            login($scope.username, $scope.password).then(function(result){
+            login($scope.username, $scope.password).then(function(user){
                 $scope.isInvalidUser = false;
                 $scope.isInvalidPassword = false;
-
+                $rootScope.currentUser = user;
                 $rootScope.stopLoading();
                 $location.path('/storyboard/'+$scope.username);
 
@@ -93,7 +94,7 @@ app.controller('StartStoryController', [
     }
 ]);
 
-app.controller('RegisterController',['$scope', '$rootScope', '$route', 'signUp', function($scope, $rootScope, $route, signUp){
+app.controller('RegisterController',['$scope', '$rootScope', '$route', '$location', 'signUp', function($scope, $rootScope, $route, $location, signUp){
     function init(){
         $scope.email = null;
         $scope.username = null;
@@ -102,26 +103,79 @@ app.controller('RegisterController',['$scope', '$rootScope', '$route', 'signUp',
     };
 
     $scope.reg = function(){
-        var _result = signUp($scope.email, $scope.username, $scope.password).then(function(result){
+        var _photoGroup = document.querySelector('#photoGroup');
+        var _photo = _photoGroup.selectedItem.getValue();
+
+        var _result = signUp(_photo, $scope.email, $scope.username, $scope.password).then(function(result){
             $rootScope.showToastWithMsg(result);
-            $location.path('/storyboard/'+$scope.username);
+            $rootScope.gotoPreviously();
         }, function(err){
             $rootScope.showToastWithMsg(err);
         });
-    }
+
+    };
+
+    $scope.back = function(){
+        $rootScope.gotoPreviously();
+    };
 
     init();
 }]);
 
 app.controller('TeamBoardController', [
-    '$scope', '$rootScope', '$route', 'createProject', 'projects',
-    function($scope, $rootScope, $route, createProject, projects){
+    '$scope', '$rootScope', '$route', '$location', '$sce', 'createProject', 'projects', 'allUsers', 'addTask',
+    function($scope, $rootScope, $route, $location, $sce, createProject, projects, allUsers, addTask){
         function init(){
-            $scope.navTitle = $route.current.params.team;
-            $scope.manageProjectIcon = "settings";
-            $scope.newProjectName = '';
-            $scope.projects = projects;
+            try {
+                $scope.navTitle = $route.current.params.team;
+                $scope.userPhoto = $sce.trustAsResourceUrl('./images/'+$rootScope.currentUser.photo+'.png');
+                $scope.newProjectName = '';
+                $scope.projects = projects;
+                $scope.taskTypes = _initTasktyps();
+                $scope.users = _initUsers();
+
+                $scope.tempNewTask = null;
+                $scope.tasks = [];
+                $scope.taskViewList = [];
+
+                var _board = document.querySelector('#board');
+                _board.addEventListener('core-select', function(ev){
+                    var _taskType = Task.TASK_STATUS[ev.target.selected];
+                    for(var i= 0,len=$scope.taskViewList.length; i<len; i++){
+                        $scope.taskViewList[i].shouldHidden(_taskType);
+                    }
+                });
+            }catch(e){
+                $rootScope.showToastWithMsg("Encounter error!");
+                $location.path('/');
+            }
         };
+        function _initTasktyps(){
+            var _tasktypes = {};
+            for(var i= 0, len=Task.TASK_TYPE.length; i<len; i++){
+                _tasktypes[Task.TASK_TYPE[i]] = $sce.trustAsResourceUrl('./images/'+Task.TASK_TYPE[i]+'.png');
+            }
+            return _tasktypes;
+        };
+        function _initUsers(){
+            var _users = [];
+            for(var i=0, len=allUsers.length; i<len; i++){
+                var _u = allUsers[i];
+                _u = new User(_u.email, _u.username, _u.photo);
+                _u.setPhotoUrl($sce.trustAsResourceUrl('./images/'+_u.photo+'.png'));
+                _users.push(_u);
+            }
+            return _users;
+        };
+        function _initTaskView(task){
+            var _taskView = new StoryTask();
+
+            _taskView.task = task;
+            _taskView.addEventListener('process-task', $scope.processTaskHandler);
+            $scope.taskViewList.push(_taskView);
+            document.querySelector('.task-container').appendChild(_taskView);
+        };
+
         $scope.openDrawer = function(){
             document.querySelector('#storyBoard').openDrawer();
         };
@@ -130,6 +184,10 @@ app.controller('TeamBoardController', [
         };
         $scope.toggleDialog = function(){
             document.querySelector('#new-project').toggle();
+        };
+        $scope.toggleTaskDialog = function(){
+            $scope.tempNewTask = new Task();
+            document.querySelector('#new-task').toggle();
         };
         $scope.createProject = function(){
             if($scope.newProjectName.length === 0){
@@ -145,6 +203,42 @@ app.controller('TeamBoardController', [
                 $rootScope.showToastWithMsg(err);
             });
         };
+        $scope.createTask = function(){
+           $scope.toggleTaskDialog();
+        };
+        $scope.addNewTask = function(){
+
+            try{
+                var _taskType = document.querySelector('#taskType').selectedItem,
+                    _taskOwner = document.querySelector('#taskOwner').selectedItem,
+                    _newTaskName = $scope.tempNewTask.name,
+                    _newTaskDesc = $scope.tempNewTask.desc,
+                    _estimate = parseFloat($scope.tempNewTask.estimate);
+
+                if(0 === _newTaskName.trim().length || 0 === _newTaskDesc.trim().length
+                    || 0 === _taskType.label.length || 0 === _taskOwner.label.length
+                    || _estimate <= 0){
+                    throw 'error';
+                }
+                $scope.tempNewTask.estimate = _estimate;
+                $scope.tempNewTask.type = _taskType.label;
+                $scope.tempNewTask.owner = _taskOwner.label;
+                $scope.tempNewTask.setOwnerPhotoUrl(_taskOwner.src);
+                $scope.tempNewTask.setTaskIconUrl(_taskType.src);
+                $scope.tasks.push($scope.tempNewTask);
+                _initTaskView($scope.tempNewTask);
+
+                //addTask('test', _task).then(function(newTaskList){}, function(err){});
+            }catch(e){
+                $rootScope.showToastWithMsg("Can not create new task!");
+            }
+        };
+        $scope.processTaskHandler = function(taskView){
+            var _selectedIndex = document.querySelector('#board').selected;
+            console.log(Task.TASK_STATUS[parseInt(_selectedIndex)]);
+            taskView.shouldHidden();
+
+        };
         init();
     }
 ]);
@@ -156,14 +250,14 @@ app.factory('localStorage', function(){
 });
 
 app.factory('signUp', ['$q', 'localStorage', function($q, localStorage){
-    return function(email, username, password){
+    return function(photo, email, username, password){
         var _defer = $q.defer();
         try{
             var _users = localStorage.users, _result = 'success';
             _users = undefined === _users? []: JSON.parse(_users);
 
-            for(var i=0,len=localStorage.length; i<len; i++){
-                var _user = localStorage[i];
+            for(var i=0,len=_users.length; i<len; i++){
+                var _user = _users[i];
                 if(email === _user.email){
                     throw 'The email address have been used.';
                 }
@@ -172,7 +266,7 @@ app.factory('signUp', ['$q', 'localStorage', function($q, localStorage){
                 }
             }
 
-            _users.push({'email':email,'username':username,'password':password});
+            _users.push({'photo':photo, 'email':email,'username':username,'password':password});
             localStorage.setItem('users', JSON.stringify(_users));
             _defer.resolve(_result);
         }catch(e){
@@ -194,7 +288,7 @@ app.factory('login', ['$q', 'localStorage', function($q, localStorage){
                 var _user = _users[i];
                 if(username === _user.username && password === _user.password){
                     _result = 'success';
-                    _defer.resolve(_result);
+                    _defer.resolve(new User(_user.email, _user.username, _user.photo));
                     break;
                 }
             }
@@ -208,6 +302,10 @@ app.factory('login', ['$q', 'localStorage', function($q, localStorage){
             return _defer.promise;
         }
     };
+}]);
+
+app.factory('allUsers', ['localStorage', function(localStorage){
+    return JSON.parse(localStorage.users);
 }]);
 
 app.factory('createProject', ['$q', 'localStorage', function($q, localStorage){
@@ -235,3 +333,69 @@ app.factory('createProject', ['$q', 'localStorage', function($q, localStorage){
 app.factory('projects',['localStorage', function(localStorage){
     return JSON.parse(localStorage.projects);
 }]);
+
+app.factory('addTask',['$q', 'localStorage', function($q, localStorage){
+    return function(projectName, task){
+        var _defer = $q.defer();
+        try{
+            var _projects = localStorage.projects, project=null;
+            _projects = undefined === _projects ? {} : JSON.parse(_projects);
+            for(project in _projects){
+                if(projectName === project){
+                    _projects[projectName].push(task);
+                    break
+                }
+            }
+            localStorage.setItem('projects', JSON.stringify(_projects));
+            _defer.resolve(_projects[projectName]);
+        }catch(e){
+            _defer.reject("Create task error!");
+        }finally{
+            return _defer.promise;
+        }
+    }
+}]);
+
+
+var User = function(email, username, photo){
+    this.email = email;
+    this.username = username;
+    this.photo = User.PHOTO_DIC.indexOf(photo) >= 0 ? photo : 'default_user';
+};
+
+User.PHOTO_DIC = ['default_user', 'fullbeard', 'girl'];
+
+User.prototype = {
+    setPassword:function(password){},
+    setConfirmPwd:function(confirmPwd){},
+    setPhotoUrl:function(url){this.photoUrl = url;}
+};
+
+var Task = function(name, type, desc, status, owner, estimate){
+    this.name = name;
+    this.type = Task.TASK_TYPE.indexOf(type) >= 0 ? type : 'Bug';
+    this.desc = desc;
+    this.status = Task.TASK_STATUS.indexOf(status) >=0 ? status : 'TODO';
+    this.owner = owner;
+    this.estimate = estimate;
+    this.ownerPhotoUrl = null;
+    this.taskIconUrl = null;
+};
+
+Task.TASK_TYPE = ['bug', 'feature', 'improvement'];
+Task.TASK_STATUS = ['TODO', 'DOING', 'DONE'];
+
+Task.prototype = {
+    assign:function(owner){},
+    toggleStatus:function(){
+        var _index = Task.TASK_STATUS.indexOf(this.status);
+        if(2 !== _index){
+            this.status = Task.TASK_STATUS[_index+1];
+        }
+    },
+    setOwnerPhotoUrl:function(url){this.ownerPhotoUrl = url;},
+    setTaskIconUrl:function(url){this.taskIconUrl = url;},
+    updateName:function(newName){},
+    updateType:function(newType){},
+    updateDesc:function(newDesc){}
+};

@@ -1,10 +1,15 @@
 <core-header-panel class="start">
     <core-toolbar class="dark-theme">
-        <paper-icon-button id="navicon" icon="arrow-back"></paper-icon-button>
+        <paper-icon-button id="navicon" icon="arrow-back" ng-click="back()"></paper-icon-button>
         <h3>Register</h3>
     </core-toolbar>
     <section class="reg-section">
         <div class="reg-form">
+            <paper-radio-group id="photoGroup" class="blue" selected="0">
+                <icon-radio-button ng-model="photo" value="default_user"><img src="images/default_user.png"></icon-radio-button>
+                <icon-radio-button ng-model="photo" value="girl"><img src="images/girl.png"></icon-radio-button>
+                <icon-radio-button ng-model="photo" value="fullbeard"><img src="images/fullbeard.png"></icon-radio-button>
+            </paper-radio-group>
             <paper-input ng-model="email" label="Email" floatinglabel=""></paper-input>
             <paper-input ng-model="username" label="Username" floatinglabel=""></paper-input>
             <paper-input ng-model="password" label="Password" floatinglabel=""></paper-input>
