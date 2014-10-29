@@ -185,17 +185,19 @@ app.controller('TeamBoardController', [
             document.querySelector('.task-container').appendChild(_taskView);
         };
         $scope.selectProject = function(project){
-            $scope.currentProject = project;
-            var _taskContainerDOM = document.querySelector('.task-container');
-            while(_taskContainerDOM.firstChild){
-                _taskContainerDOM.removeChild(_taskContainerDOM.firstChild);
+            if(project){
+                $scope.currentProject = project;
+                var _taskContainerDOM = document.querySelector('.task-container');
+                while(_taskContainerDOM.firstChild){
+                    _taskContainerDOM.removeChild(_taskContainerDOM.firstChild);
+                }
+                $scope.taskViewList.length = 0;
+                var _taskList = getAllTaskWithProjectName(project);
+                for(var i=0, len=_taskList.length; i<len; i++){
+                    _initTaskView(_taskList[i], 'TODO');
+                }
+                document.querySelector('#board').selected = 0;
             }
-            $scope.taskViewList.length = 0;
-            var _taskList = getAllTaskWithProjectName(project);
-            for(var i=0, len=_taskList.length; i<len; i++){
-                _initTaskView(_taskList[i], 'TODO');
-            }
-            document.querySelector('#board').selected = 0;
         };
 
         $scope.openDrawer = function(){
