@@ -6,8 +6,10 @@
             <span>{{navTitle}}</span>
             <core-icon-button id="create-project" icon="settings" ng-click="toggleDialog()"></core-icon-button>
         </core-toolbar>
-        <core-menu theme="core-light-theme">
-            <core-item icon="settings" ng-repeat="(p, _) in projects" label="{{p}}" horizontal="" center="" layout=""></core-item>
+        <core-menu theme="core-light-theme" selected="0">
+            <core-item icon="settings" ng-repeat="(p, _) in projects" label="{{p}}" horizontal="" center="" layout="" >
+                <a href="" target="_self" ng-click="selectProject(p)"></a>
+            </core-item>
         </core-menu>
     </core-header-panel>
 

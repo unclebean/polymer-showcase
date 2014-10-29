@@ -99,7 +99,7 @@
             },
             taskProcess:function(e, detail, sender){
                 this.task.toggleStatus();
-                this.fire('process-task', e);
+                this.fire('process-task', this);
             },
             shouldHidden:function(status){
                 this.hidden = this.task.status !== status;

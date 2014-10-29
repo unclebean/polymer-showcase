@@ -96,17 +96,21 @@ app.controller('StartStoryController', [
 
 app.controller('RegisterController',['$scope', '$rootScope', '$route', '$location', 'signUp', function($scope, $rootScope, $route, $location, signUp){
     function init(){
-        $scope.email = null;
-        $scope.username = null;
-        $scope.password = null;
-        $scope.confirmpwd = null;
+        $scope.email = '';
+        $scope.username = '';
+        $scope.password = '';
+        $scope.confirmpwd = '';
     };
 
     $scope.reg = function(){
         var _photoGroup = document.querySelector('#photoGroup');
         var _photo = _photoGroup.selectedItem.getValue();
-
-        var _result = signUp(_photo, $scope.email, $scope.username, $scope.password).then(function(result){
+        if(0 === $scope.email.length || 0 === $scope.username.length 
+            || 0 === $scope.password.length || $scope.password !== $scope.confirmpwd){
+            $rootScope.showToastWithMsg("Register user error!");
+            return false;
+        }
+        signUp(_photo, $scope.email, $scope.username, $scope.password).then(function(result){
             $rootScope.showToastWithMsg(result);
             $rootScope.gotoPreviously();
         }, function(err){
@@ -123,21 +127,25 @@ app.controller('RegisterController',['$scope', '$rootScope', '$route', '$locatio
 }]);
 
 app.controller('TeamBoardController', [
-    '$scope', '$rootScope', '$route', '$location', '$sce', 'createProject', 'projects', 'allUsers', 'addTask',
-    function($scope, $rootScope, $route, $location, $sce, createProject, projects, allUsers, addTask){
+    '$scope', '$rootScope', '$route', '$location', '$sce', 'createProject', 'projects', 'allUsers', 'addTask', 'updateTask', 'getAllTaskWithProjectName',
+    function($scope, $rootScope, $route, $location, $sce, createProject, projects, allUsers, addTask, updateTask, getAllTaskWithProjectName){
         function init(){
             try {
                 $scope.navTitle = $route.current.params.team;
                 $scope.userPhoto = $sce.trustAsResourceUrl('./images/'+$rootScope.currentUser.photo+'.png');
                 $scope.newProjectName = '';
-                $scope.projects = projects;
+                $scope.projects = projects();
                 $scope.taskTypes = _initTasktyps();
                 $scope.users = _initUsers();
-
+                $scope.currentProject = null;
                 $scope.tempNewTask = null;
-                $scope.tasks = [];
+                
                 $scope.taskViewList = [];
 
+                for($scope.currentProject in $scope.projects){
+                    break;
+                }
+                $scope.selectProject($scope.currentProject);
                 var _board = document.querySelector('#board');
                 _board.addEventListener('core-select', function(ev){
                     var _taskType = Task.TASK_STATUS[ev.target.selected];
@@ -167,13 +175,27 @@ app.controller('TeamBoardController', [
             }
             return _users;
         };
-        function _initTaskView(task){
+        function _initTaskView(task, defautStatus){
             var _taskView = new StoryTask();
 
             _taskView.task = task;
             _taskView.addEventListener('process-task', $scope.processTaskHandler);
+            _taskView.shouldHidden(defautStatus);
             $scope.taskViewList.push(_taskView);
             document.querySelector('.task-container').appendChild(_taskView);
+        };
+        $scope.selectProject = function(project){
+            $scope.currentProject = project;
+            var _taskContainerDOM = document.querySelector('.task-container');
+            while(_taskContainerDOM.firstChild){
+                _taskContainerDOM.removeChild(_taskContainerDOM.firstChild);
+            }
+            $scope.taskViewList.length = 0;
+            var _taskList = getAllTaskWithProjectName(project);
+            for(var i=0, len=_taskList.length; i<len; i++){
+                _initTaskView(_taskList[i], 'TODO');
+            }
+            document.querySelector('#board').selected = 0;
         };
 
         $scope.openDrawer = function(){
@@ -198,6 +220,9 @@ app.controller('TeamBoardController', [
             createProject($scope.newProjectName).then(function(result){
                 $rootScope.showToastWithMsg(result);
                 $scope.projects[$scope.newProjectName] = [];
+                if(null === $scope.currentProject){
+                    $scope.currentProject = $scope.newProjectName;
+                }
                 $scope.toggleDialog();
             }, function(err){
                 $rootScope.showToastWithMsg(err);
@@ -225,19 +250,20 @@ app.controller('TeamBoardController', [
                 $scope.tempNewTask.owner = _taskOwner.label;
                 $scope.tempNewTask.setOwnerPhotoUrl(_taskOwner.src);
                 $scope.tempNewTask.setTaskIconUrl(_taskType.src);
-                $scope.tasks.push($scope.tempNewTask);
-                _initTaskView($scope.tempNewTask);
+  
+                _initTaskView($scope.tempNewTask, 'TODO');
 
-                //addTask('test', _task).then(function(newTaskList){}, function(err){});
+                addTask($scope.currentProject, $scope.tempNewTask).then(function(newTaskList){
+                    document.querySelector('#board').selected = 0;
+                }, function(err){});
             }catch(e){
                 $rootScope.showToastWithMsg("Can not create new task!");
             }
         };
         $scope.processTaskHandler = function(taskView){
             var _selectedIndex = document.querySelector('#board').selected;
-            console.log(Task.TASK_STATUS[parseInt(_selectedIndex)]);
-            taskView.shouldHidden();
-
+            taskView.currentTarget.shouldHidden(Task.TASK_STATUS[parseInt(_selectedIndex)]);
+            updateTask($scope.currentProject, taskView.currentTarget.task);
         };
         init();
     }
@@ -331,7 +357,13 @@ app.factory('createProject', ['$q', 'localStorage', function($q, localStorage){
 }]);
 
 app.factory('projects',['localStorage', function(localStorage){
-    return JSON.parse(localStorage.projects);
+    return function(){
+        var _projects = localStorage.projects;
+        
+        _projects = undefined === _projects? {} : JSON.parse(_projects);
+
+        return _projects;
+    }
 }]);
 
 app.factory('addTask',['$q', 'localStorage', function($q, localStorage){
@@ -342,6 +374,7 @@ app.factory('addTask',['$q', 'localStorage', function($q, localStorage){
             _projects = undefined === _projects ? {} : JSON.parse(_projects);
             for(project in _projects){
                 if(projectName === project){
+                    task.id = _projects[projectName].length+1;
                     _projects[projectName].push(task);
                     break
                 }
@@ -354,6 +387,43 @@ app.factory('addTask',['$q', 'localStorage', function($q, localStorage){
             return _defer.promise;
         }
     }
+}]);
+
+app.factory('updateTask', ['$q', 'localStorage', function($q, localStorage){
+    return function(projectName, task){
+        var _projects = localStorage.projects, project=null;
+            _projects = undefined === _projects ? {} : JSON.parse(_projects);
+        var _taskList = _projects[projectName];
+        for(var i=0,len=_taskList.length; i<len; i++){
+            var _task = _taskList[i];
+            if(_task.id === task.id){
+                _taskList[i] = task;
+                break;
+            }
+        }
+        localStorage.setItem('projects', JSON.stringify(_projects));
+    };
+}]);
+
+app.factory('getAllTaskWithProjectName', ['$q', 'projects', function($q, projects){
+    return function(projectName){
+        var _taskList = projects()[projectName], _taskInstanceList = [];
+        for(var i=0,len=_taskList.length; i<len; i++){
+            var _taskOrigin = _taskList[i],
+                _taskInstance = new Task();
+            _taskInstance.name = _taskOrigin.name;
+            _taskInstance.type = _taskOrigin.type;
+            _taskInstance.status = _taskOrigin.status;
+            _taskInstance.desc = _taskOrigin.desc;
+            _taskInstance.owner = _taskOrigin.owner;
+            _taskInstance.estimate = _taskOrigin.estimate;
+            _taskInstance.taskIconUrl = _taskOrigin.taskIconUrl;
+            _taskInstance.ownerPhotoUrl = _taskOrigin.ownerPhotoUrl;
+            _taskInstance.id = _taskOrigin.id;
+            _taskInstanceList.push(_taskInstance);
+        }
+        return _taskInstanceList;
+    };
 }]);
 
 
@@ -380,6 +450,7 @@ var Task = function(name, type, desc, status, owner, estimate){
     this.estimate = estimate;
     this.ownerPhotoUrl = null;
     this.taskIconUrl = null;
+    this.id = null;
 };
 
 Task.TASK_TYPE = ['bug', 'feature', 'improvement'];

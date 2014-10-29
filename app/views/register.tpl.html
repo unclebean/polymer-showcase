@@ -10,10 +10,10 @@
                 <icon-radio-button ng-model="photo" value="girl"><img src="images/girl.png"></icon-radio-button>
                 <icon-radio-button ng-model="photo" value="fullbeard"><img src="images/fullbeard.png"></icon-radio-button>
             </paper-radio-group>
-            <paper-input ng-model="email" label="Email" floatinglabel=""></paper-input>
+            <paper-input ng-model="email" type="email" label="Email" floatinglabel=""></paper-input>
             <paper-input ng-model="username" label="Username" floatinglabel=""></paper-input>
-            <paper-input ng-model="password" label="Password" floatinglabel=""></paper-input>
-            <paper-input ng-model="confirmpwd" label="Confirm password" floatinglabel=""></paper-input>
+            <paper-input ng-model="password" type="password" label="Password" floatinglabel=""></paper-input>
+            <paper-input ng-model="confirmpwd" type="password" label="Confirm password" floatinglabel=""></paper-input>
             <paper-button label="Sign up" ng-click="reg()"></paper-button>
         </div>
     </section>
