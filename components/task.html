@@ -1,0 +1,109 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<polymer-element name="story-task" constructor="StoryTask">
+    <template>
+        <style>
+            :host {
+                position: relative;
+                background-color: white;
+                padding: 20px;
+                width:160px;
+                height:120px;
+                font-size: 0.6rem;
+                font-weight: 300;
+                flex: 1 1 auto;
+                margin:5px;
+                -webkit-transition: width 0.7s ease-out;
+                transition: width 0.7s ease-out;
+            }
+            :host::shadow .task-type{
+                height: 100%;
+                left: 0;
+                position: absolute;
+                text-indent: -9999em;
+                top: 0;
+                width: 5px;
+            }
+            :host::shadow .task img{
+                float:left;
+            }
+            :host::shadow .task h2{
+                float:left;
+                font-size: 0.6em;
+            }
+            :host::shadow .bug{
+                background-color: red;
+            }
+            :host::shadow .feature{
+                background-color: green;
+            }
+            :host::shadow .improvement{
+                background-color: yellow;
+            }
+            :host::shadow .task-name  h2{
+                font-size: 20px;
+                margin: 5px;
+            }
+            :host::shadow .task-desc  h3{
+                font-size:16px;
+                margin: 10px 20px;
+                font-weight: 100;
+            }
+            :host::shadow .task-owner{
+
+                float:right;
+            }
+            :host::shadow .task-owner h5{
+                display: inline-block;
+                font-size: 14px;
+                font-weight: 100;
+                margin: 5px;
+            }
+            :host::shadow .task-owner span{
+                font-style:italic;
+                font-size: 12px;
+            }
+            :host::shadow paper-button {
+                margin: 0 16px 0 4px;
+            }
+            :host::shadow .task-processing{
+                position: absolute;
+                bottom: 10px;
+            }
+        </style>
+        <div class="task">
+            <div class="task-type {{task.type}}"></div>
+            <div class="task-name" layout horizontal center>
+                <img class="task-icon" src="{{task.taskIconUrl}}" width="16" height="16">
+                <h2>{{task.name}}</h2>
+            </div>
+            <div class="task-desc" layout horizontal center>
+                <h3>{{task.desc}}</h3>
+            </div>
+            <div class="task-owner">
+                <img class="owner-icon" src="{{task.ownerPhotoUrl}}" width="24" height="24">
+                <h5>{{task.owner}}</h5>
+                <span>{{task.estimate}}h</span>
+            </div>
+            <div class="task-processing">
+                <paper-button raisedbutton="" label="{{task.status}}" on-tap="{{taskProcess}}"></paper-button>
+            </div>
+        </div>
+        <content></content>
+    </template>
+    <script>
+        Polymer("story-task", {
+            ready:function(){
+
+            },
+            taskProcess:function(e, detail, sender){
+                this.task.toggleStatus();
+                this.fire('process-task', this);
+            },
+            shouldHidden:function(status){
+                this.hidden = this.task.status !== status;
+            }
+        });
+    </script>
+</polymer-element>

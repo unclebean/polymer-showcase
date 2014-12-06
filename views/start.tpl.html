@@ -1,0 +1,12 @@
+<core-header-panel class="start">
+    <core-toolbar class="dark-theme">
+        <span flex>Story Board</span>
+    </core-toolbar>
+    <section class="start-story">
+        <paper-input id="username" class="team" invalid="{{isInvalidUser}}" ng-model="username" floatinglabel="" label="Username" validate="^[0-9|a-z|A-Z|-]*$" error="Invalid username!"></paper-input>
+        <paper-input id="password" class="team" invalid="{{isInvalidPassword}}" ng-model="password" type="password" floatinglabel="" label="Password" validate="^[0-9|a-z|A-Z|-]*$" error="Invalid password!"></paper-input>
+
+        <paper-button class="start-btn" raisedbutton="" label="Log in" role="button" tabindex="0" aria-label="colored" ng-click="login()"></paper-button>
+        <paper-button class="start-btn" label="Sign up" role="button" tabindex="0" aria-label="colored" ng-click="signup()"></paper-button>
+    </section>
+</core-header-panel>

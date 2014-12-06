@@ -1,0 +1,117 @@
+body {
+    font-family: sans-serif;
+}
+core-header-panel.start {
+    background: white;
+    /* height: 100% fails here on some browsers */
+    height: 100vh;
+    width: 100vw;
+}
+
+core-toolbar.dark-theme {
+    background-color: #03A9F4 !important;
+    color: #ffffff;
+    fill: #f1f1f1;
+}
+core-scaffold::shadow core-toolbar {
+    background: #03A9F4;
+}
+paper-tabs{
+    background-color: #0094d4 !important;
+    color: #ffffff;
+    box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.2);
+}
+core-scaffold {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.start-story {
+    margin: 20px;
+    padding: 60px 20px;
+}
+
+.reg-section {
+    margin:30px;
+}
+.reg-section .reg-form{
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+}
+
+.reg-section paper-input{
+    width:100%;
+}
+
+.team {
+    width: 100%;
+}
+.start-btn{
+
+    background: #3367d6;
+    color: #fff;
+    width:45%;
+    margin:2%;
+}
+
+.start-btn[raisedbutton]{
+    background: #dfdfdf !important;
+    color: rgba(74, 74, 74, 0.80);
+}
+paper-button {
+    text-transform: none;
+}
+#create-project{
+    background: #0094d4;
+    position: absolute;
+    right: 0px;
+    top:13px;
+}
+paper-dialog {
+    width: 50%;
+    min-width: 160px;
+}
+@media screen and (max-width: 320px) {
+    .start-btn{
+        width:100%;
+    }
+}
+
+.task-container{
+    /* basic styling */
+    width: 100%;
+    /* flexbox setup */
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.task img{
+    float:left;
+}
+.task h2{
+    float:left;
+    font-size: 0.6em;
+}
+
+.task-type{
+    height: 100%;
+    left: 0;
+    position: absolute;
+    text-indent: -9999em;
+    top: 0;
+    width: 5px;
+    background-color: red;
+}
+
+.task-dropdown core-item::shadow core-icon, .task-dropdown::shadow core-item::shadow core-icon{
+    width:16px;
+    height:16px;
+}
