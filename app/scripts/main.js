@@ -257,6 +257,7 @@ app.controller('TeamBoardController', [
 
                 addTask($scope.currentProject, $scope.tempNewTask).then(function(newTaskList){
                     document.querySelector('#board').selected = 0;
+                    $scope.tempNewTask = new Task();
                 }, function(err){});
             }catch(e){
                 $rootScope.showToastWithMsg("Can not create new task!");
